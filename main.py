@@ -140,7 +140,7 @@ async def updateDB():
             createSong.create_delightMusic(session, songItem)
         elif emotion == 'neutral':
             print(emotion)
-            createSong.create_delightMusic(session, songItem)
+            createSong.create_calmMusic(session, songItem)
         elif emotion == 'worry':
             print(emotion)
             createSong.create_anxietyMusic(session, songItem)
