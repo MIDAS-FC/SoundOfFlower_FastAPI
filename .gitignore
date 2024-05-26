@@ -8,4 +8,6 @@ requirements.txt
 
 kobert_emotion_model.pt
 
+emotion_analysis_model_eng.pt
+
 .env
