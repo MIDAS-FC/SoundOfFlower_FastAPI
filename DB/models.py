@@ -8,7 +8,7 @@ class SadMusic(Base):
    __tablename__ = "sad_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(INT, nullable=False)
+   spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
@@ -23,7 +23,7 @@ class AngryMusic(Base):
    __tablename__ = "angry_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(INT, nullable=False)
+   spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
@@ -38,7 +38,7 @@ class DelightMusic(Base):
    __tablename__ = "delight_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(INT, nullable=False)
+   spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
@@ -53,7 +53,7 @@ class CalmMusic(Base):
    __tablename__ = "calm_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(INT, nullable=False)
+   spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
@@ -68,7 +68,7 @@ class EmbrrasedMusic(Base):
    __tablename__ = "embrrased_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(INT, nullable=False)
+   spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
@@ -83,7 +83,7 @@ class AnxietyMusic(Base):
    __tablename__ = "anxiety_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(INT, nullable=False)
+   spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
@@ -98,7 +98,7 @@ class LoveMusic(Base):
    __tablename__ = "love_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(INT, nullable=False)
+   spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)

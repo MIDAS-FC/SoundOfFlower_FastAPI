@@ -25,6 +25,7 @@ def get_songs() -> List[Song]:
     results = sp.playlist_items(playlist_id, market='KR')
 
     for item in results['items']:
+        track = item['track']
         artist_names = [artist['name'] for artist in track['artists']]
         data = {
             "trackId": str(track['id']),

@@ -3,7 +3,7 @@ import numpy as np
 import emotionFunc
 from DB.database import engineconn
 from fastapi import FastAPI, Request
-from transformers import BertModel
+from transformers import BertModel, BertForSequenceClassification, BertTokenizer
 from kr.bert import BERTClassifier
 from kr.bertDataSet import BERTDataset
 from starlette.middleware.cors import CORSMiddleware
@@ -11,6 +11,10 @@ from torch.utils.data import Dataset, DataLoader
 from torch.nn.functional import softmax
 from torch.utils.data import DataLoader
 from kobert_tokenizer import KoBERTTokenizer
+from spotify.spotifyAPI import get_songs
+from musixmatch.musixmatchAPI import get_lyrics
+from pydanticModels import SongItem
+import createSong
 
 app = FastAPI()
 
@@ -22,10 +26,10 @@ else:
     device = torch.device("cpu")
     print('No GPU available, using the CPU instead.')
 
-bertmodel = BertModel.from_pretrained('skt/kobert-base-v1', return_dict=False)
-model_dict = torch.load('kobert_emotion_model.pt')
-model = BERTClassifier(bertmodel,  dr_rate = 0.5).to(device)
-tokenizer = KoBERTTokenizer.from_pretrained('skt/kobert-base-v1')
+kr_bertmodel = BertModel.from_pretrained('skt/kobert-base-v1', return_dict=False)
+kr_model_dict = torch.load('kobert_emotion_model.pt')
+kr_model = BERTClassifier(kr_bertmodel,  dr_rate = 0.5).to(device)
+kr_tokenizer = KoBERTTokenizer.from_pretrained('skt/kobert-base-v1')
 
 origins = [ "*" ]
 
@@ -51,12 +55,12 @@ async def predict(input:Request):
     data = [inputStr, '0']  # '0'은 더미 레이블
     dataset_another = [data]
     #주어진 데이터로 BERTDataset 초기화
-    another_test = BERTDataset(dataset_another, 0, 1, tokenizer, 64, True, False)
+    another_test = BERTDataset(dataset_another, 0, 1, kr_tokenizer, 64, True, False)
     #DataLoader를 생성하여 데이터셋을 배치로 나누고 모델에 제공
     test_dataloader = DataLoader(another_test, batch_size=1, num_workers=0)
 
     #평가 모드로 설정
-    model.eval()
+    kr_model.eval()
     #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
     for batch_data in test_dataloader:
         #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
@@ -64,7 +68,7 @@ async def predict(input:Request):
         attention_mask = batch_data['attention_mask'].to(device)
 
         #모델을 통해 문장을 전달해 예측 수행
-        out = model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
+        out = kr_model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
         # Softmax를 적용하여 모델의 출력을 확률로 변환.
         logits = out.detach().cpu().numpy()
         #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
@@ -84,5 +88,71 @@ async def predict(input:Request):
             'love' : emotionList[6],
             'musicId' : emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0], emotionList[4], emotionList[5], emotionList[1], emotionList[3], emotionList[2], emotionList[6])
         }
+        
+        
+
+# 모델 구조 생성
+eng_model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=7)
+eng_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+# 저장된 상태 사전을 모델에 불러오기
+eng_model_dict = torch.load('emotion_analysis_model_eng.pt')
+eng_model.load_state_dict(eng_model_dict['model_state_dict'])
+
+@app.get("/soundOfFlower/updateDB")
+async def updateDB():  
+
+    # 감정 레이블 정의 (예: 0 = 'suprise', 1 = 'Love', 2 = 'Happy', 3 = 'Sadness', 4 = 'Anger', 5 = 'Fear')
+    emotion_labels = ['sadness', 'happiness', 'neutral', 'worry', 'surprise', 'love', 'anger']
+    songs = get_songs()
+    for song in songs:
+        lyricList = get_lyrics(song)
+        print("a")
+        print(type(lyricList))
+        if lyricList == None:
+            continue
+        
+        total_emotion = np.zeros(len(emotion_labels))
+        
+        print("before lyric for")
+        for lyric in lyricList:
+            print("after lyric for")
+            text = lyric
+            inputs = eng_tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
+
+            # 모델 예측
+            with torch.no_grad():
+                outputs = eng_model(**inputs)
+                logits = outputs.logits
+                total_emotion += logits[0].numpy()
+                
+        average_emotion = total_emotion / len(lyricList)
+        max_index = np.argmax(average_emotion)
+        print("max_index : "+str(max_index))
+        emotion = emotion_labels[max_index]
+        
+        songItem = SongItem(title=song.trackName, spotifyId=song.trackId, emotion=emotion, emotionList=average_emotion.tolist())
+        print("emotion : "+emotion)
+        if emotion == 'sadness':
+            print("emotion : "+emotion)
+            createSong.create_sadMusic(session, songItem)
+        elif emotion == 'happiness':
+            print(emotion)
+            createSong.create_delightMusic(session, songItem)
+        elif emotion == 'neutral':
+            print(emotion)
+            createSong.create_delightMusic(session, songItem)
+        elif emotion == 'worry':
+            print(emotion)
+            createSong.create_anxietyMusic(session, songItem)
+        elif emotion == 'surprise':
+            print(emotion)
+            createSong.create_embrrasedMusic(session, songItem)
+        elif emotion == 'love':
+            print(emotion)
+            createSong.create_loveMusic(session, songItem)
+        elif emotion == 'anger':
+            print(emotion)
+            createSong.create_angryMusic(session, songItem)
+
 
     
