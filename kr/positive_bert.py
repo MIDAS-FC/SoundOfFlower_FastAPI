@@ -1,14 +1,14 @@
 import torch
 from torch import nn
 
-class BERTClassifier(nn.Module):
+class PositiveBERTClassifier(nn.Module):
     def __init__(self,
                  bert,
                  hidden_size = 768,
                  num_classes = 2,
                  dr_rate = None,
                  params = None):
-        super(BERTClassifier, self).__init__()
+        super(PositiveBERTClassifier, self).__init__()
         self.bert = bert
         self.dr_rate = dr_rate
 

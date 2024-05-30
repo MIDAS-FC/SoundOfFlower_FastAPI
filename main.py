@@ -4,12 +4,12 @@ import emotionFunc
 from DB.database import engineconn
 from fastapi import FastAPI, Request
 from transformers import BertModel, BertForSequenceClassification, BertTokenizer
-from kr.positive_bert import BERTClassifier
+from kr.positive_bert import PositiveBERTClassifier
+from kr.negative_bert import NegativeBERTClassifier
 from kr.bertDataSet import BERTDataset
 from starlette.middleware.cors import CORSMiddleware
 from torch.utils.data import Dataset, DataLoader
 from torch.nn.functional import softmax
-from torch.utils.data import DataLoader
 from kobert_tokenizer import KoBERTTokenizer
 from spotify.spotifyAPI import get_songs
 from musixmatch.musixmatchAPI import get_lyrics
@@ -32,12 +32,12 @@ kr_tokenizer = KoBERTTokenizer.from_pretrained('skt/kobert-base-v1')
 
 #긍정
 positive_model_dict = torch.load('positive.pt')
-positive_model = BERTClassifier(bertmodel,  dr_rate = 0.5).to(device)
+positive_model = PositiveBERTClassifier(bertmodel,  dr_rate = 0.5).to(device)
 positive_model.load_state_dict(positive_model_dict)
 
 #부정
 negative_model_dict = torch.load('negative.pt')
-negative_model = BERTClassifier(bertmodel,  dr_rate = 0.5).to(device)
+negative_model = NegativeBERTClassifier(bertmodel,  dr_rate = 0.5).to(device)
 negative_model.load_state_dict(negative_model_dict)
 
 origins = [ "*" ]
@@ -117,8 +117,8 @@ async def predict(input:Request):
     else: #neutrality. 감정 분석 안함. 바로 중립 노래 추천    
         predicted_emotion = '중립'
         emotionList = [0, 0, 0, 1, 0, 0, 0]
-        
-        
+        input = await input.json()
+        inputStr = input['comment']
     #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
     # for batch_data in test_dataloader:
     #     #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
@@ -159,11 +159,12 @@ eng_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 eng_model_dict = torch.load('emotion_analysis_model_eng.pt')
 eng_model.load_state_dict(eng_model_dict['model_state_dict'])
 
-@app.get("/soundOfFlower/updateDB")
-async def updateDB():  
-
+@app.post("/soundOfFlower/updateDB")
+async def updateDB(input:Request): 
+    input = await input.json()
+    inputPlaylist = input['playlist']
     # 감정 레이블 정의 (예: 0 = 'suprise', 1 = 'Love', 2 = 'Happy', 3 = 'Sadness', 4 = 'Anger', 5 = 'Fear')
-    emotion_labels = ['sadness', 'happiness', 'neutral', 'worry', 'surprise', 'love', 'anger']
+    emotion_labels = ['sadness', 'happiness', 'love']
     songs = get_songs()
     for song in songs:
         lyricList = get_lyrics(song)
@@ -199,21 +200,10 @@ async def updateDB():
         elif emotion == 'happiness':
             print(emotion)
             createSong.create_delightMusic(session, songItem)
-        elif emotion == 'neutral':
-            print(emotion)
-            createSong.create_calmMusic(session, songItem)
-        elif emotion == 'worry':
-            print(emotion)
-            createSong.create_anxietyMusic(session, songItem)
-        elif emotion == 'surprise':
-            print(emotion)
-            createSong.create_embrrasedMusic(session, songItem)
         elif emotion == 'love':
             print(emotion)
             createSong.create_loveMusic(session, songItem)
-        elif emotion == 'anger':
-            print(emotion)
-            createSong.create_angryMusic(session, songItem)
+
 
 
     
