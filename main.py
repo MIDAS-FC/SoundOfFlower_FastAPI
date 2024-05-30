@@ -147,7 +147,7 @@ async def predict(input:Request):
             'embarrased' : emotionList[4],
             'anxiety' : emotionList[5],
             'love' : emotionList[6],
-            'musicId' : emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0], emotionList[4], emotionList[5], emotionList[1], emotionList[3], emotionList[2], emotionList[6])
+            'musicId' : emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0], emotionList[1], emotionList[2], emotionList[3], emotionList[4], emotionList[5], emotionList[6])
         }
         
         

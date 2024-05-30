@@ -17,8 +17,9 @@ def flower(emotion):
     elif emotion == "사랑":
         return "달리아"
     
+def    
     
-def get_spotifyId(db: Session, emotion:str, angry: float, sad:float, delight:float, calm:float, embrrased:float, anxiety:float, love:float):
+def get_spotifyId(db: Session, emotion:str, angry: float, sad:float, delight:float, calm:float, embarrased:float, anxiety:float, love:float):
     if emotion == "분노":
         angryMusic = get_angryMusic(db, angry, sad, delight, calm, embrrased, anxiety, love)
         if angryMusic:
