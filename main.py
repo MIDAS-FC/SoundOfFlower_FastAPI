@@ -94,12 +94,12 @@ async def predict(input:Request):
             #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
             probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
             positive_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
-            predicted_emotion = emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
+            predicted_emotion = positive_emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
             emotionList = [0, 0, positive_emotion_counts[0], 0, 0, 0, positive_emotion_counts[1]]
        
     elif inputEmotion == 'negative':
         negative_emotion_counts = np.zeros(4)
-        positive_emotions = ["분노", "불안", "당황", "슬픔"]
+        negative_emotions = ["분노", "불안", "당황", "슬픔"]
         negative_model.eval()
         
             #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
@@ -115,11 +115,12 @@ async def predict(input:Request):
             #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
             probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
             negative_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
-            predicted_emotion = emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
+            predicted_emotion = negative_emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
             emotionList = [negative_emotion_counts[0], negative_emotion_counts[3], 0, 0, negative_emotion_counts[2], negative_emotion_counts[1], 0]
-        #부정 감정 분석 수행
+        
     else: #neutrality. 감정 분석 안함. 바로 중립 노래 추천    
         predicted_emotion = '중립'
+        emotionList = [0, 0, 0, 1, 0, 0, 0]
         
         
     #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
@@ -147,7 +148,10 @@ async def predict(input:Request):
             'embarrased' : emotionList[4],
             'anxiety' : emotionList[5],
             'love' : emotionList[6],
-            'musicId' : emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0], emotionList[1], emotionList[2], emotionList[3], emotionList[4], emotionList[5], emotionList[6])
+            'musicId' : emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0],
+                                                  emotionList[1], emotionList[2], emotionList[3],
+                                                  emotionList[4], emotionList[5], emotionList[6], 
+                                                  inputMaintain, inputEmotion)
         }
         
         

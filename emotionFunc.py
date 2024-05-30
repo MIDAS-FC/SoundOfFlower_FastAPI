@@ -36,11 +36,18 @@ def get_spotifyId(db: Session, emotion:str, angry: float, sad:float, delight:flo
         return neutralMusic.spotipyId
     else: #negative
         if emotion == "슬픔":
-            sadMusic = get_sadMusic(db, angry, sad, delight, calm, embarrassed, anxiety, love)
-            if sadMusic:
-                return sadMusic.spotipyId
-            else:
-                return None
+            if maintain == "true":
+                sadMusic = get_sadMusic(db, angry, sad, delight, calm, embarrassed, anxiety, love)
+                if sadMusic:
+                    return sadMusic.spotipyId
+                else:
+                    return None
+            else: # 긍정 노래 추천
+                positiveMusic = get_positiveMusic(db)
+                if positiveMusic:
+                    return positiveMusic.spotipyId
+                else:
+                    return None    
         else: # 분노, 불안, 당황
             positiveMusic = get_positiveMusic(db)
             if positiveMusic:
