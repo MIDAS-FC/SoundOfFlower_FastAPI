@@ -2,6 +2,20 @@ from sqlalchemy.orm import Session
 from DB.models import SadMusic, DelightMusic, LoveMusic
 from pydanticModels import SongItem
 
+def alreadyExist(db: Session, spotifyId:str):
+    song = db.query(SadMusic).filter(SadMusic.spotipyId == spotifyId).first()
+    if song:
+        return True
+    song = db.query(DelightMusic).filter(DelightMusic.spotipyId == spotifyId).first()
+    if song:
+        return True
+    song = db.query(LoveMusic).filter(LoveMusic.spotipyId == spotifyId).first()
+    if song:
+        return True
+    
+    return False
+
+
 def create_sadMusic(db: Session, songItem:SongItem):
     sadmusic = SadMusic(spotipyId=songItem.spotifyId,
                         title = songItem.title,
