@@ -10,12 +10,8 @@ class SadMusic(Base):
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
    spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
-   angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
    delight = Column(DOUBLE, nullable=False)
-   calm = Column(DOUBLE, nullable=False)
-   embrrased = Column(DOUBLE, nullable=False)
-   anxiety = Column(DOUBLE, nullable=False)
    love = Column(DOUBLE, nullable=False)
 
 #기쁨
@@ -25,12 +21,8 @@ class DelightMusic(Base):
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
    spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
-   angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
    delight = Column(DOUBLE, nullable=False)
-   calm = Column(DOUBLE, nullable=False)
-   embrrased = Column(DOUBLE, nullable=False)
-   anxiety = Column(DOUBLE, nullable=False)
    love = Column(DOUBLE, nullable=False)
 
 #사랑
@@ -40,10 +32,6 @@ class LoveMusic(Base):
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
    spotipyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
-   angry = Column(DOUBLE, nullable=False)
    sad = Column(DOUBLE, nullable=False)
    delight = Column(DOUBLE, nullable=False)
-   calm = Column(DOUBLE, nullable=False)
-   embrrased = Column(DOUBLE, nullable=False)
-   anxiety = Column(DOUBLE, nullable=False)
    love = Column(DOUBLE, nullable=False)

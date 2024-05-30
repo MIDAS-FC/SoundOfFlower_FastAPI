@@ -15,6 +15,7 @@ from spotify.spotifyAPI import get_songs
 from musixmatch.musixmatchAPI import get_lyrics
 from pydanticModels import SongItem
 import createSong
+import joblib
 
 app = FastAPI()
 
@@ -137,7 +138,7 @@ async def predict(input:Request):
                                               emotionList[1], emotionList[2], emotionList[3],
                                               emotionList[4], emotionList[5], emotionList[6], 
                                               inputMaintain, inputEmotion)
-    if 
+    
     return {
         'flower' : emotionFunc.flower(predicted_emotion),
         'angry' : emotionList[0],
@@ -153,7 +154,8 @@ async def predict(input:Request):
                                               inputMaintain, inputEmotion)
     }
         
-        
+model = joblib.load('emotion_classification_model.pkl')
+vectorizer = joblib.load('tfidf_vectorizer.pkl')  
 
 # # 모델 구조 생성
 # eng_model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=7)
@@ -162,50 +164,49 @@ async def predict(input:Request):
 # eng_model_dict = torch.load('emotion_analysis_model_eng.pt')
 # eng_model.load_state_dict(eng_model_dict['model_state_dict'])
 
-# @app.post("/soundOfFlower/updateDB")
-# async def updateDB(input:Request): 
-#     input = await input.json()
-#     inputPlaylist = input['playlist']
-#     # 감정 레이블 정의 (예: 0 = 'suprise', 1 = 'Love', 2 = 'Happy', 3 = 'Sadness', 4 = 'Anger', 5 = 'Fear')
-#     emotion_labels = ['sadness', 'happiness', 'love']
-#     songs = get_songs()
-#     for song in songs:
-#         lyricList = get_lyrics(song)
-#         print("a")
-#         print(type(lyricList))
-#         if lyricList == None:
-#             continue
+@app.post("/soundOfFlower/updateDB")
+async def updateDB(input:Request): 
+    input = await input.json()
+    inputPlaylist = input['playlist']
+    if not inputPlaylist.strip():  # playlist가 없거나 공백으로 이루어져있으면
+        return {"invalidInput": True}
+    
+    # 감정 레이블 정의
+    emotion_labels = ['sadness', 'happiness', 'love']
+    songs = get_songs(inputPlaylist)
+    for song in songs:
+        lyricList = get_lyrics(song)
+        print("a")
+        print(type(lyricList))
+        if lyricList == None:
+            continue
         
-#         total_emotion = np.zeros(len(emotion_labels))
+        total_emotion = np.zeros(len(emotion_labels))
         
-#         print("before lyric for")
-#         for lyric in lyricList:
-#             print("after lyric for")
-#             text = lyric
-#             inputs = eng_tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
-
-#             # 모델 예측
-#             with torch.no_grad():
-#                 outputs = eng_model(**inputs)
-#                 logits = outputs.logits
-#                 total_emotion += logits[0].numpy()
+        print("before lyric for")
+        for lyric in lyricList:
+            print("after lyric for")
+            text = lyric
+            text_vec = vectorizer.transform([text])
+            scores = model.predict_proba(text_vec)[0]
+            total_emotion += scores
                 
-#         average_emotion = total_emotion / len(lyricList)
-#         max_index = np.argmax(average_emotion)
-#         print("max_index : "+str(max_index))
-#         emotion = emotion_labels[max_index]
+        average_emotion = total_emotion / len(lyricList)
+        max_index = np.argmax(average_emotion)
+        print("max_index : "+str(max_index))
+        emotion = emotion_labels[max_index]
         
-#         songItem = SongItem(title=song.trackName, spotifyId=song.trackId, emotion=emotion, emotionList=average_emotion.tolist())
-#         print("emotion : "+emotion)
-#         if emotion == 'sadness':
-#             print("emotion : "+emotion)
-#             createSong.create_sadMusic(session, songItem)
-#         elif emotion == 'happiness':
-#             print(emotion)
-#             createSong.create_delightMusic(session, songItem)
-#         elif emotion == 'love':
-#             print(emotion)
-#             createSong.create_loveMusic(session, songItem)
+        songItem = SongItem(title=song.trackName, spotifyId=song.trackId, emotion=emotion, emotionList=average_emotion.tolist())
+        print("emotion : "+emotion)
+        if emotion == 'sadness':
+            print("emotion : "+emotion)
+            createSong.create_sadMusic(session, songItem)
+        elif emotion == 'happiness':
+            print(emotion)
+            createSong.create_delightMusic(session, songItem)
+        elif emotion == 'love':
+            print(emotion)
+            createSong.create_loveMusic(session, songItem)
 
 
 

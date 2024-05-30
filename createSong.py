@@ -5,13 +5,9 @@ from pydanticModels import SongItem
 def create_sadMusic(db: Session, songItem:SongItem):
     sadmusic = SadMusic(spotipyId=songItem.spotifyId,
                         title = songItem.title,
-                        angry = songItem.emotionList[6],
-                        love = songItem.emotionList[5],
-                        embrrased = songItem.emotionList[4],
-                        anxiety = songItem.emotionList[3],
-                        calm = songItem.emotionList[2],
+                        sad = songItem.emotionList[0],
                         delight = songItem.emotionList[1],
-                        sad = songItem.emotionList[0])
+                        love = songItem.emotionList[2])
     
     db.add(sadmusic)
     db.commit()
@@ -20,13 +16,9 @@ def create_sadMusic(db: Session, songItem:SongItem):
 def create_delightMusic(db: Session, songItem:SongItem):
     delightMusic = DelightMusic(spotipyId=songItem.spotifyId,
                         title = songItem.title,
-                        angry = songItem.emotionList[6],
-                        love = songItem.emotionList[5],
-                        embrrased = songItem.emotionList[4],
-                        anxiety = songItem.emotionList[3],
-                        calm = songItem.emotionList[2],
+                        sad = songItem.emotionList[0],
                         delight = songItem.emotionList[1],
-                        sad = songItem.emotionList[0])
+                        love = songItem.emotionList[2])
     
     db.add(delightMusic)
     db.commit()
@@ -35,13 +27,9 @@ def create_delightMusic(db: Session, songItem:SongItem):
 def create_loveMusic(db: Session, songItem:SongItem):
     loveMusic = LoveMusic(spotipyId=songItem.spotifyId,
                         title = songItem.title,
-                        angry = songItem.emotionList[6],
-                        love = songItem.emotionList[5],
-                        embrrased = songItem.emotionList[4],
-                        anxiety = songItem.emotionList[3],
-                        calm = songItem.emotionList[2],
+                        sad = songItem.emotionList[0],
                         delight = songItem.emotionList[1],
-                        sad = songItem.emotionList[0])
+                        love = songItem.emotionList[2])
     
     db.add(loveMusic)
     db.commit()

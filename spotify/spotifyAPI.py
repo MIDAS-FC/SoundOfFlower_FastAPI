@@ -14,10 +14,11 @@ class Song(BaseModel):
     trackName : str
     artistName : str
 
-def get_songs() -> List[Song]:
+def get_songs(playlistID:str) -> List[Song]:
     cid = os.getenv('SPOTIFY_CID')
     secret = os.getenv('SPOTIFY_SECRET')
-    playlist_id = '37i9dQZF1DXcBWIGoYBM5M'
+    # 기존에는 37i9dQZF1DXcBWIGoYBM5M
+    playlist_id = playlistID
     songs = []
     
     client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
