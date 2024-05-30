@@ -43,13 +43,13 @@ def get_delightMusic(db: Session, angry: float, sad:float, delight:float, calm:f
     closest_music = db.query(DelightMusic).\
         order_by(
             func.sqrt(
-                func.pow(SadMusic.angry - angry, 2) +
-                func.pow(SadMusic.sad - sad, 2) +
-                func.pow(SadMusic.delight - delight, 2) +
-                func.pow(SadMusic.calm - calm, 2) +
-                func.pow(SadMusic.embrrased - embrrased, 2) +
-                func.pow(SadMusic.anxiety - anxiety, 2) +
-                func.pow(SadMusic.love - love, 2)
+                func.pow(DelightMusic.angry - angry, 2) +
+                func.pow(DelightMusic.sad - sad, 2) +
+                func.pow(DelightMusic.delight - delight, 2) +
+                func.pow(DelightMusic.calm - calm, 2) +
+                func.pow(DelightMusic.embrrased - embrrased, 2) +
+                func.pow(DelightMusic.anxiety - anxiety, 2) +
+                func.pow(DelightMusic.love - love, 2)
             )
         ).\
         first()
@@ -60,13 +60,13 @@ def get_loveMusic(db: Session, angry: float, sad:float, delight:float, calm:floa
     closest_music = db.query(LoveMusic).\
         order_by(
             func.sqrt(
-                func.pow(SadMusic.angry - angry, 2) +
-                func.pow(SadMusic.sad - sad, 2) +
-                func.pow(SadMusic.delight - delight, 2) +
-                func.pow(SadMusic.calm - calm, 2) +
-                func.pow(SadMusic.embrrased - embrrased, 2) +
-                func.pow(SadMusic.anxiety - anxiety, 2) +
-                func.pow(SadMusic.love - love, 2)
+                func.pow(LoveMusic.angry - angry, 2) +
+                func.pow(LoveMusic.sad - sad, 2) +
+                func.pow(LoveMusic.delight - delight, 2) +
+                func.pow(LoveMusic.calm - calm, 2) +
+                func.pow(LoveMusic.embrrased - embrrased, 2) +
+                func.pow(LoveMusic.anxiety - anxiety, 2) +
+                func.pow(LoveMusic.love - love, 2)
             )
         ).\
         first()

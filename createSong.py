@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from DB.models import SadMusic, AngryMusic, AnxietyMusic, DelightMusic, CalmMusic, EmbrrasedMusic, LoveMusic
+from DB.models import SadMusic, DelightMusic, LoveMusic
 from pydanticModels import SongItem
 
 def create_sadMusic(db: Session, songItem:SongItem):

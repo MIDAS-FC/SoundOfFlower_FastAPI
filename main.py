@@ -117,8 +117,6 @@ async def predict(input:Request):
     else: #neutrality. 감정 분석 안함. 바로 중립 노래 추천    
         predicted_emotion = '중립'
         emotionList = [0, 0, 0, 1, 0, 0, 0]
-        input = await input.json()
-        inputStr = input['comment']
     #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
     # for batch_data in test_dataloader:
     #     #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
@@ -135,74 +133,74 @@ async def predict(input:Request):
     #     predicted_emotion = emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
     #     emotionList = emotion_counts.tolist()
         
-        return {
-            'flower' : emotionFunc.flower(predicted_emotion),
-            'angry' : emotionList[0],
-            'sad' : emotionList[1],
-            'delight' : emotionList[2],
-            'calm' : emotionList[3],
-            'embarrased' : emotionList[4],
-            'anxiety' : emotionList[5],
-            'love' : emotionList[6],
-            'musicId' : emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0],
-                                                  emotionList[1], emotionList[2], emotionList[3],
-                                                  emotionList[4], emotionList[5], emotionList[6], 
-                                                  inputMaintain, inputEmotion)
-        }
+    return {
+        'flower' : emotionFunc.flower(predicted_emotion),
+        'angry' : emotionList[0],
+        'sad' : emotionList[1],
+        'delight' : emotionList[2],
+        'calm' : emotionList[3],
+        'embarrased' : emotionList[4],
+        'anxiety' : emotionList[5],
+        'love' : emotionList[6],
+        'musicId' : emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0],
+                                              emotionList[1], emotionList[2], emotionList[3],
+                                              emotionList[4], emotionList[5], emotionList[6], 
+                                              inputMaintain, inputEmotion)
+    }
         
         
 
-# 모델 구조 생성
-eng_model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=7)
-eng_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-# 저장된 상태 사전을 모델에 불러오기
-eng_model_dict = torch.load('emotion_analysis_model_eng.pt')
-eng_model.load_state_dict(eng_model_dict['model_state_dict'])
+# # 모델 구조 생성
+# eng_model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=7)
+# eng_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+# # 저장된 상태 사전을 모델에 불러오기
+# eng_model_dict = torch.load('emotion_analysis_model_eng.pt')
+# eng_model.load_state_dict(eng_model_dict['model_state_dict'])
 
-@app.post("/soundOfFlower/updateDB")
-async def updateDB(input:Request): 
-    input = await input.json()
-    inputPlaylist = input['playlist']
-    # 감정 레이블 정의 (예: 0 = 'suprise', 1 = 'Love', 2 = 'Happy', 3 = 'Sadness', 4 = 'Anger', 5 = 'Fear')
-    emotion_labels = ['sadness', 'happiness', 'love']
-    songs = get_songs()
-    for song in songs:
-        lyricList = get_lyrics(song)
-        print("a")
-        print(type(lyricList))
-        if lyricList == None:
-            continue
+# @app.post("/soundOfFlower/updateDB")
+# async def updateDB(input:Request): 
+#     input = await input.json()
+#     inputPlaylist = input['playlist']
+#     # 감정 레이블 정의 (예: 0 = 'suprise', 1 = 'Love', 2 = 'Happy', 3 = 'Sadness', 4 = 'Anger', 5 = 'Fear')
+#     emotion_labels = ['sadness', 'happiness', 'love']
+#     songs = get_songs()
+#     for song in songs:
+#         lyricList = get_lyrics(song)
+#         print("a")
+#         print(type(lyricList))
+#         if lyricList == None:
+#             continue
         
-        total_emotion = np.zeros(len(emotion_labels))
+#         total_emotion = np.zeros(len(emotion_labels))
         
-        print("before lyric for")
-        for lyric in lyricList:
-            print("after lyric for")
-            text = lyric
-            inputs = eng_tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
+#         print("before lyric for")
+#         for lyric in lyricList:
+#             print("after lyric for")
+#             text = lyric
+#             inputs = eng_tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
 
-            # 모델 예측
-            with torch.no_grad():
-                outputs = eng_model(**inputs)
-                logits = outputs.logits
-                total_emotion += logits[0].numpy()
+#             # 모델 예측
+#             with torch.no_grad():
+#                 outputs = eng_model(**inputs)
+#                 logits = outputs.logits
+#                 total_emotion += logits[0].numpy()
                 
-        average_emotion = total_emotion / len(lyricList)
-        max_index = np.argmax(average_emotion)
-        print("max_index : "+str(max_index))
-        emotion = emotion_labels[max_index]
+#         average_emotion = total_emotion / len(lyricList)
+#         max_index = np.argmax(average_emotion)
+#         print("max_index : "+str(max_index))
+#         emotion = emotion_labels[max_index]
         
-        songItem = SongItem(title=song.trackName, spotifyId=song.trackId, emotion=emotion, emotionList=average_emotion.tolist())
-        print("emotion : "+emotion)
-        if emotion == 'sadness':
-            print("emotion : "+emotion)
-            createSong.create_sadMusic(session, songItem)
-        elif emotion == 'happiness':
-            print(emotion)
-            createSong.create_delightMusic(session, songItem)
-        elif emotion == 'love':
-            print(emotion)
-            createSong.create_loveMusic(session, songItem)
+#         songItem = SongItem(title=song.trackName, spotifyId=song.trackId, emotion=emotion, emotionList=average_emotion.tolist())
+#         print("emotion : "+emotion)
+#         if emotion == 'sadness':
+#             print("emotion : "+emotion)
+#             createSong.create_sadMusic(session, songItem)
+#         elif emotion == 'happiness':
+#             print(emotion)
+#             createSong.create_delightMusic(session, songItem)
+#         elif emotion == 'love':
+#             print(emotion)
+#             createSong.create_loveMusic(session, songItem)
 
 
 
