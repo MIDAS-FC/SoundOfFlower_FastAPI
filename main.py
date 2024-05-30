@@ -133,6 +133,11 @@ async def predict(input:Request):
     #     predicted_emotion = emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
     #     emotionList = emotion_counts.tolist()
         
+    musicId = emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0],
+                                              emotionList[1], emotionList[2], emotionList[3],
+                                              emotionList[4], emotionList[5], emotionList[6], 
+                                              inputMaintain, inputEmotion)
+    if 
     return {
         'flower' : emotionFunc.flower(predicted_emotion),
         'angry' : emotionList[0],

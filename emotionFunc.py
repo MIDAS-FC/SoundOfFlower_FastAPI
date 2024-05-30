@@ -33,7 +33,10 @@ def get_spotifyId(db: Session, emotion:str, angry: float, sad:float, delight:flo
                 return None
     elif preEmotion == "neutrality":
         neutralMusic = get_randomMusic(db)
-        return neutralMusic.spotipyId
+        if neutralMusic:
+            return neutralMusic.spotipyId
+        else:
+            return None
     else: #negative
         if emotion == "슬픔":
             if maintain == "true":
