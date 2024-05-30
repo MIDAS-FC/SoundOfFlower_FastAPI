@@ -6,8 +6,8 @@ __pycache__
 
 requirements.txt
 
-kobert_emotion_model.pt
+positive.pt
 
-emotion_analysis_model_eng.pt
+negative.pt
 
 .env

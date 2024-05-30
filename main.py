@@ -4,7 +4,7 @@ import emotionFunc
 from DB.database import engineconn
 from fastapi import FastAPI, Request
 from transformers import BertModel, BertForSequenceClassification, BertTokenizer
-from kr.bert import BERTClassifier
+from kr.positive_bert import BERTClassifier
 from kr.bertDataSet import BERTDataset
 from starlette.middleware.cors import CORSMiddleware
 from torch.utils.data import Dataset, DataLoader
@@ -39,10 +39,6 @@ positive_model.load_state_dict(positive_model_dict)
 negative_model_dict = torch.load('negative.pt')
 negative_model = BERTClassifier(bertmodel,  dr_rate = 0.5).to(device)
 negative_model.load_state_dict(negative_model_dict)
-# 삭제
-kr_model_dict = torch.load('kobert_emotion_model.pt')
-kr_model = BERTClassifier(bertmodel,  dr_rate = 0.5).to(device)
-
 
 origins = [ "*" ]
 
