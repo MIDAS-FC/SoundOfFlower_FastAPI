@@ -133,11 +133,6 @@ async def predict(input:Request):
     #     emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
     #     predicted_emotion = emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
     #     emotionList = emotion_counts.tolist()
-        
-    musicId = emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0],
-                                              emotionList[1], emotionList[2], emotionList[3],
-                                              emotionList[4], emotionList[5], emotionList[6], 
-                                              inputMaintain, inputEmotion)
     
     return {
         'flower' : emotionFunc.flower(predicted_emotion),
@@ -148,10 +143,9 @@ async def predict(input:Request):
         'embarrased' : emotionList[4],
         'anxiety' : emotionList[5],
         'love' : emotionList[6],
-        'musicId' : emotionFunc.get_spotifyId(session, predicted_emotion, emotionList[0],
-                                              emotionList[1], emotionList[2], emotionList[3],
-                                              emotionList[4], emotionList[5], emotionList[6], 
-                                              inputMaintain, inputEmotion)
+        'musicId' : emotionFunc.get_spotifyId(db=session, emotion=predicted_emotion, 
+                                              sad=emotionList[1], delight=emotionList[2], love=emotionList[6], #sad, delight, love 정보만 필요 
+                                              maintain=inputMaintain, preEmotion=inputEmotion)
     }
         
 model = joblib.load('emotion_classification_model.pkl')

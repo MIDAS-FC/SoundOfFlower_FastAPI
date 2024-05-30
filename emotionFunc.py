@@ -17,16 +17,16 @@ def flower(emotion):
     elif emotion == "사랑":
         return "달리아"
     
-def get_spotifyId(db: Session, emotion:str, angry: float, sad:float, delight:float, calm:float, embarrassed:float, anxiety:float, love:float, maintain:str, preEmotion:str):
+def get_spotifyId(db: Session, emotion:str, sad:float, delight:float, love:float, maintain:str, preEmotion:str):
     if preEmotion == "positive":
         if emotion == "기쁨":
-            delightMusic = get_delightMusic(db, angry, sad, delight, calm, embarrassed, anxiety, love)
+            delightMusic = get_delightMusic(db, sad, delight, love)
             if delightMusic:
                 return delightMusic.spotipyId
             else:
                 return None
         else: #사랑
-            loveMusic = get_loveMusic(db, angry, sad, delight, calm, embarrassed, anxiety, love)
+            loveMusic = get_loveMusic(db, sad, delight, love)
             if loveMusic:
                 return loveMusic.spotipyId
             else:
@@ -40,7 +40,7 @@ def get_spotifyId(db: Session, emotion:str, angry: float, sad:float, delight:flo
     else: #negative
         if emotion == "슬픔":
             if maintain == "true":
-                sadMusic = get_sadMusic(db, angry, sad, delight, calm, embarrassed, anxiety, love)
+                sadMusic = get_sadMusic(db, sad, delight, love)
                 if sadMusic:
                     return sadMusic.spotipyId
                 else:

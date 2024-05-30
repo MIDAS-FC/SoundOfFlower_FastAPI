@@ -4,16 +4,12 @@ from DB.models import SadMusic, DelightMusic, LoveMusic
 import random
 
 #슬픔 노래 추천
-def get_sadMusic(db: Session, angry:float, sad:float, delight:float, calm:float, embrrased:float, anxiety:float, love:float):
+def get_sadMusic(db: Session, sad:float, delight:float, love:float):
     closest_music = db.query(SadMusic).\
         order_by(
             func.sqrt(
-                func.pow(SadMusic.angry - angry, 2) +
                 func.pow(SadMusic.sad - sad, 2) +
                 func.pow(SadMusic.delight - delight, 2) +
-                func.pow(SadMusic.calm - calm, 2) +
-                func.pow(SadMusic.embrrased - embrrased, 2) +
-                func.pow(SadMusic.anxiety - anxiety, 2) +
                 func.pow(SadMusic.love - love, 2)
             )
         ).\
@@ -39,16 +35,12 @@ def get_randomMusic(db: Session):
         return db.query(SadMusic).order_by(func.rand()).first()
     
 #기쁨 노래 추천
-def get_delightMusic(db: Session, angry: float, sad:float, delight:float, calm:float, embrrased:float, anxiety:float, love:float):
+def get_delightMusic(db: Session, sad:float, delight:float, love:float):
     closest_music = db.query(DelightMusic).\
         order_by(
             func.sqrt(
-                func.pow(DelightMusic.angry - angry, 2) +
                 func.pow(DelightMusic.sad - sad, 2) +
                 func.pow(DelightMusic.delight - delight, 2) +
-                func.pow(DelightMusic.calm - calm, 2) +
-                func.pow(DelightMusic.embrrased - embrrased, 2) +
-                func.pow(DelightMusic.anxiety - anxiety, 2) +
                 func.pow(DelightMusic.love - love, 2)
             )
         ).\
@@ -56,16 +48,12 @@ def get_delightMusic(db: Session, angry: float, sad:float, delight:float, calm:f
     return closest_music
 
 #사랑 노래 추천
-def get_loveMusic(db: Session, angry: float, sad:float, delight:float, calm:float, embrrased:float, anxiety:float, love:float):
+def get_loveMusic(db: Session, sad:float, delight:float, love:float):
     closest_music = db.query(LoveMusic).\
         order_by(
             func.sqrt(
-                func.pow(LoveMusic.angry - angry, 2) +
                 func.pow(LoveMusic.sad - sad, 2) +
                 func.pow(LoveMusic.delight - delight, 2) +
-                func.pow(LoveMusic.calm - calm, 2) +
-                func.pow(LoveMusic.embrrased - embrrased, 2) +
-                func.pow(LoveMusic.anxiety - anxiety, 2) +
                 func.pow(LoveMusic.love - love, 2)
             )
         ).\
