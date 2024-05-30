@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from getMusic import get_angryMusic, get_delightMusic, get_embrrasedMusic, get_anxietyMusic, get_calmMusic, get_loveMusic, get_sadMusic
+from getMusic import get_delightMusic, get_loveMusic, get_sadMusic, get_positiveMusic, get_randomMusic
 
 def flower(emotion):
     if emotion == "분노":
@@ -17,36 +17,33 @@ def flower(emotion):
     elif emotion == "사랑":
         return "달리아"
     
-def    
-    
-def get_spotifyId(db: Session, emotion:str, angry: float, sad:float, delight:float, calm:float, embarrased:float, anxiety:float, love:float):
-    if emotion == "분노":
-        angryMusic = get_angryMusic(db, angry, sad, delight, calm, embrrased, anxiety, love)
-        if angryMusic:
-            return angryMusic.spotipyId
-    elif emotion == "기쁨":
-        delightMusic = get_delightMusic(db, angry, sad, delight, calm, embrrased, anxiety, love)
-        if delightMusic:
-            return delightMusic.spotipyId
-    elif emotion == "당황":
-        embrrasedMusic = get_embrrasedMusic(db, angry, sad, delight, calm, embrrased, anxiety, love)
-        if embrrasedMusic:
-            return embrrasedMusic.spotipyId
-    elif emotion == "불안":
-        anxietyMusic = get_anxietyMusic(db, angry, sad, delight, calm, embrrased, anxiety, love)
-        if anxietyMusic:
-            return anxietyMusic.spotipyId
-    elif emotion == "슬픔":
-        sadMusic = get_sadMusic(db, angry, sad, delight, calm, embrrased, anxiety, love)
-        if sadMusic:
-            return sadMusic.spotipyId
-    elif emotion == "중립":
-        calmMusic = get_calmMusic(db, angry, sad, delight, calm, embrrased, anxiety, love)
-        if calmMusic:
-            return calmMusic.spotipyId
-    elif emotion == "사랑":
-        loveMusic = get_loveMusic(db, angry, sad, delight, calm, embrrased, anxiety, love)
-        if loveMusic:
-            return loveMusic.spotipyId
-    else:
-        return "잘못된 감정입니다."
+def get_spotifyId(db: Session, emotion:str, angry: float, sad:float, delight:float, calm:float, embarrassed:float, anxiety:float, love:float, maintain:str, preEmotion:str):
+    if preEmotion == "positive":
+        if emotion == "기쁨":
+            delightMusic = get_delightMusic(db, angry, sad, delight, calm, embarrassed, anxiety, love)
+            if delightMusic:
+                return delightMusic.spotipyId
+            else:
+                return None
+        else: #사랑
+            loveMusic = get_loveMusic(db, angry, sad, delight, calm, embarrassed, anxiety, love)
+            if loveMusic:
+                return loveMusic.spotipyId
+            else:
+                return None
+    elif preEmotion == "neutrality":
+        neutralMusic = get_randomMusic(db)
+        return neutralMusic.spotipyId
+    else: #negative
+        if emotion == "슬픔":
+            sadMusic = get_sadMusic(db, angry, sad, delight, calm, embarrassed, anxiety, love)
+            if sadMusic:
+                return sadMusic.spotipyId
+            else:
+                return None
+        else: # 분노, 불안, 당황
+            positiveMusic = get_positiveMusic(db)
+            if positiveMusic:
+                return positiveMusic.spotipyId
+            else:
+                return None

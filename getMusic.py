@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from DB.models import SadMusic, AngryMusic, AnxietyMusic, DelightMusic, CalmMusic, EmbrrasedMusic, LoveMusic
+from DB.models import SadMusic, DelightMusic, LoveMusic
 import random
 
 #슬픔 노래 추천
@@ -21,7 +21,7 @@ def get_sadMusic(db: Session, angry:float, sad:float, delight:float, calm:float,
     return closest_music
 
 #사랑 및 기쁨(긍정) 노래 추천 -> 랜덤
-def get_positiveMusic(db: Session, angry: float, sad:float, delight:float, calm:float, embrrased:float, anxiety:float, love:float):
+def get_positiveMusic(db: Session):
     random_integer = random.randint(0, 1)
     if random_integer == 0: #사랑 노래 추천
         return db.query(LoveMusic).order_by(func.rand()).first()
@@ -29,7 +29,7 @@ def get_positiveMusic(db: Session, angry: float, sad:float, delight:float, calm:
         return db.query(DelightMusic).order_by(func.rand()).first()
     
 #사랑 및 기쁨, 슬픔(랜덤) 노래 추천 -> 랜덤
-def get_randomMusic(db: Session, angry: float, sad:float, delight:float, calm:float, embrrased:float, anxiety:float, love:float):
+def get_randomMusic(db: Session):
     random_integer = random.randint(0,2)
     if random_integer == 0: #사랑 노래 추천
         return db.query(LoveMusic).order_by(func.rand()).first()
