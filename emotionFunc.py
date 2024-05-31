@@ -22,19 +22,19 @@ def get_spotifyId(db: Session, emotion:str, sad:float, delight:float, love:float
         if emotion == "기쁨":
             delightMusic = get_delightMusic(db, sad, delight, love)
             if delightMusic:
-                return delightMusic.spotifyId
+                return delightMusic.spotify
             else:
                 return None
         else: #사랑
             loveMusic = get_loveMusic(db, sad, delight, love)
             if loveMusic:
-                return loveMusic.spotifyId
+                return loveMusic.spotify
             else:
                 return None
     elif preEmotion == "neutrality":
         neutralMusic = get_randomMusic(db)
         if neutralMusic:
-            return neutralMusic.spotifyId
+            return neutralMusic.spotify
         else:
             return None
     else: #negative
@@ -42,18 +42,18 @@ def get_spotifyId(db: Session, emotion:str, sad:float, delight:float, love:float
             if maintain == "true":
                 sadMusic = get_sadMusic(db, sad, delight, love)
                 if sadMusic:
-                    return sadMusic.spotifyId
+                    return sadMusic.spotify
                 else:
                     return None
             else: # 긍정 노래 추천
                 positiveMusic = get_positiveMusic(db)
                 if positiveMusic:
-                    return positiveMusic.spotifyId
+                    return positiveMusic.spotify
                 else:
                     return None    
         else: # 분노, 불안, 당황
             positiveMusic = get_positiveMusic(db)
             if positiveMusic:
-                return positiveMusic.spotifyId
+                return positiveMusic.spotify
             else:
                 return None

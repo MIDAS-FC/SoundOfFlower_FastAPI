@@ -167,9 +167,10 @@ async def updateDB(input:Request):
     
     # 감정 레이블 정의
     emotion_labels = ['sadness', 'happiness', 'love']
+    emotion_type_labels = ['sad', 'delight', 'love']
     songs = get_songs(inputPlaylist)
     for song in songs:
-        if createSong.alreadyExist(db=session, spotifyId=song.trackId): #이미 DB에 있으면 continue
+        if createSong.alreadyExist(db=session, spotify=song.trackId): #이미 DB에 있으면 continue
             print("continue!")
             continue
         
@@ -194,8 +195,9 @@ async def updateDB(input:Request):
         print("max_index : "+str(max_index))
         emotion = emotion_labels[max_index]
         
-        songItem = SongItem(title=song.trackName, spotifyId=song.trackId, emotion=emotion, emotionList=average_emotion.tolist())
+        songItem = SongItem(title=song.trackName, spotify=song.trackId, emotion=emotion, emotionList=average_emotion.tolist())
         print("emotion : "+emotion)
+        createSong.create_Music(session, songItem, emotion_type_labels[max_index])
         if emotion == 'sadness':
             print("emotion : "+emotion)
             createSong.create_sadMusic(session, songItem)

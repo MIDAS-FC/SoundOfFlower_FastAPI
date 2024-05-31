@@ -4,5 +4,4 @@ from pydantic import BaseModel
 class SongItem(BaseModel):
     emotion: str
     emotionList: list[float]
-    spotifyId: str
-    title: str
+    spotify: str
