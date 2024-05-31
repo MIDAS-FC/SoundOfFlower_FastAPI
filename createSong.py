@@ -3,13 +3,13 @@ from DB.models import SadMusic, DelightMusic, LoveMusic
 from pydanticModels import SongItem
 
 def alreadyExist(db: Session, spotifyId:str):
-    song = db.query(SadMusic).filter(SadMusic.spotipyId == spotifyId).first()
+    song = db.query(SadMusic).filter(SadMusic.spotifyId == spotifyId).first()
     if song:
         return True
-    song = db.query(DelightMusic).filter(DelightMusic.spotipyId == spotifyId).first()
+    song = db.query(DelightMusic).filter(DelightMusic.spotifyId == spotifyId).first()
     if song:
         return True
-    song = db.query(LoveMusic).filter(LoveMusic.spotipyId == spotifyId).first()
+    song = db.query(LoveMusic).filter(LoveMusic.spotifyId == spotifyId).first()
     if song:
         return True
     
@@ -17,7 +17,7 @@ def alreadyExist(db: Session, spotifyId:str):
 
 
 def create_sadMusic(db: Session, songItem:SongItem):
-    sadmusic = SadMusic(spotipyId=songItem.spotifyId,
+    sadmusic = SadMusic(spotifyId=songItem.spotifyId,
                         title = songItem.title,
                         sad = songItem.emotionList[0],
                         delight = songItem.emotionList[1],
@@ -28,7 +28,7 @@ def create_sadMusic(db: Session, songItem:SongItem):
     db.refresh(sadmusic)
     
 def create_delightMusic(db: Session, songItem:SongItem):
-    delightMusic = DelightMusic(spotipyId=songItem.spotifyId,
+    delightMusic = DelightMusic(spotifyId=songItem.spotifyId,
                         title = songItem.title,
                         sad = songItem.emotionList[0],
                         delight = songItem.emotionList[1],
@@ -39,7 +39,7 @@ def create_delightMusic(db: Session, songItem:SongItem):
     db.refresh(delightMusic)
     
 def create_loveMusic(db: Session, songItem:SongItem):
-    loveMusic = LoveMusic(spotipyId=songItem.spotifyId,
+    loveMusic = LoveMusic(spotifyId=songItem.spotifyId,
                         title = songItem.title,
                         sad = songItem.emotionList[0],
                         delight = songItem.emotionList[1],

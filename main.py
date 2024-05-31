@@ -163,7 +163,7 @@ async def updateDB(input:Request):
     input = await input.json()
     inputPlaylist = input['playlist']
     if not inputPlaylist.strip():  # playlist가 없거나 공백으로 이루어져있으면
-        return {"invalidInput": "true"}
+        return {"validInput": True}
     
     # 감정 레이블 정의
     emotion_labels = ['sadness', 'happiness', 'love']
@@ -206,7 +206,7 @@ async def updateDB(input:Request):
             print(emotion)
             createSong.create_loveMusic(session, songItem)
             
-    return {"invalidInput": "false"}
+    return {"validInput": True}
 
 
 

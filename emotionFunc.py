@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session # type: ignore
 from getMusic import get_delightMusic, get_loveMusic, get_sadMusic, get_positiveMusic, get_randomMusic
 
 def flower(emotion):
@@ -22,19 +22,19 @@ def get_spotifyId(db: Session, emotion:str, sad:float, delight:float, love:float
         if emotion == "기쁨":
             delightMusic = get_delightMusic(db, sad, delight, love)
             if delightMusic:
-                return delightMusic.spotipyId
+                return delightMusic.spotifyId
             else:
                 return None
         else: #사랑
             loveMusic = get_loveMusic(db, sad, delight, love)
             if loveMusic:
-                return loveMusic.spotipyId
+                return loveMusic.spotifyId
             else:
                 return None
     elif preEmotion == "neutrality":
         neutralMusic = get_randomMusic(db)
         if neutralMusic:
-            return neutralMusic.spotipyId
+            return neutralMusic.spotifyId
         else:
             return None
     else: #negative
@@ -42,18 +42,18 @@ def get_spotifyId(db: Session, emotion:str, sad:float, delight:float, love:float
             if maintain == "true":
                 sadMusic = get_sadMusic(db, sad, delight, love)
                 if sadMusic:
-                    return sadMusic.spotipyId
+                    return sadMusic.spotifyId
                 else:
                     return None
             else: # 긍정 노래 추천
                 positiveMusic = get_positiveMusic(db)
                 if positiveMusic:
-                    return positiveMusic.spotipyId
+                    return positiveMusic.spotifyId
                 else:
                     return None    
         else: # 분노, 불안, 당황
             positiveMusic = get_positiveMusic(db)
             if positiveMusic:
-                return positiveMusic.spotipyId
+                return positiveMusic.spotifyId
             else:
                 return None

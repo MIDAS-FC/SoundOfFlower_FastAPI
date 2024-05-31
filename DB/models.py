@@ -8,7 +8,7 @@ class SadMusic(Base):
    __tablename__ = "sad_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(TEXT, nullable=False)
+   spotifyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    sad = Column(DOUBLE, nullable=False)
    delight = Column(DOUBLE, nullable=False)
@@ -19,7 +19,7 @@ class DelightMusic(Base):
    __tablename__ = "delight_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(TEXT, nullable=False)
+   spotifyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    sad = Column(DOUBLE, nullable=False)
    delight = Column(DOUBLE, nullable=False)
@@ -30,7 +30,7 @@ class LoveMusic(Base):
    __tablename__ = "love_music"
 
    id = Column(BIGINT, nullable=False, autoincrement=True, primary_key=True)
-   spotipyId = Column(TEXT, nullable=False)
+   spotifyId = Column(TEXT, nullable=False)
    title = Column(TEXT, nullable=False)
    sad = Column(DOUBLE, nullable=False)
    delight = Column(DOUBLE, nullable=False)
