@@ -55,7 +55,7 @@ app.add_middleware
 engine = engineconn()
 session = engine.sessionmaker()
 
-@app.post("/soundOfFlower/predict")
+@app.post("/analyze/emotion")
 async def predict(input:Request):
     input = await input.json()
     inputStr = input['comment']
