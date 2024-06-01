@@ -6,9 +6,9 @@ def flower(emotion):
         return "장미"
     elif emotion == "기쁨":
         return "해바라기"
-    elif emotion == "당황":
-        return "튤립"
     elif emotion == "불안":
+        return "튤립"
+    elif emotion == "우울":
         return "라일락"
     elif emotion == "슬픔":
         return "블루 데이지"
@@ -51,7 +51,7 @@ def get_spotifyId(db: Session, emotion:str, sad:float, delight:float, love:float
                     return positiveMusic.spotify
                 else:
                     return None    
-        else: # 분노, 불안, 당황
+        else: # 분노, 불안, 우울
             positiveMusic = get_positiveMusic(db)
             if positiveMusic:
                 return positiveMusic.spotify

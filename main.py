@@ -62,8 +62,6 @@ async def predict(input:Request):
     inputEmotion = input['emotion']
     inputMaintain = input['maintain']
     
-    emotion_counts = np.zeros(7)
-    emotions = ["분노", "중립", "불안", "당황", "슬픔", "기쁨", "사랑"]
     #주어진 문장과 더미 레이블을 포함하는 데이터를 준비
     data = [inputStr, '0']  # '0'은 더미 레이블
     dataset_another = [data]
@@ -93,10 +91,10 @@ async def predict(input:Request):
             positive_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
             predicted_emotion = positive_emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
             emotionList = [0, 0, positive_emotion_counts[0], 0, 0, 0, positive_emotion_counts[1]]
-       
+            # angry0, sad1, delight2, calm3, embarrased4(불안), anxiety5(우울), love6
     elif inputEmotion == 'negative':
         negative_emotion_counts = np.zeros(4)
-        negative_emotions = ["분노", "불안", "당황", "슬픔"]
+        negative_emotions = ["분노", "우울", "불안", "슬픔"]
         negative_model.eval()
         
             #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
@@ -114,25 +112,10 @@ async def predict(input:Request):
             negative_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
             predicted_emotion = negative_emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
             emotionList = [negative_emotion_counts[0], negative_emotion_counts[3], 0, 0, negative_emotion_counts[2], negative_emotion_counts[1], 0]
-        
+            #[2]가 원래 당황, [1]이 불안
     else: #neutrality. 감정 분석 안함. 바로 중립 노래 추천    
         predicted_emotion = '중립'
         emotionList = [0, 0, 0, 1, 0, 0, 0]
-    #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
-    # for batch_data in test_dataloader:
-    #     #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
-    #     token_ids = batch_data['input_ids'].to(device) 
-    #     attention_mask = batch_data['attention_mask'].to(device)
-
-    #     #모델을 통해 문장을 전달해 예측 수행
-    #     out = kr_model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
-    #     # Softmax를 적용하여 모델의 출력을 확률로 변환.
-    #     logits = out.detach().cpu().numpy()
-    #     #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
-    #     probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
-    #     emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
-    #     predicted_emotion = emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
-    #     emotionList = emotion_counts.tolist()
     
     return {
         'flower' : emotionFunc.flower(predicted_emotion),
@@ -140,8 +123,8 @@ async def predict(input:Request):
         'sad' : emotionList[1],
         'delight' : emotionList[2],
         'calm' : emotionList[3],
-        'embarrased' : emotionList[4],
-        'anxiety' : emotionList[5],
+        'anxiety' : emotionList[4],
+        'depressed' : emotionList[5],
         'love' : emotionList[6],
         'spotify' : emotionFunc.get_spotifyId(db=session, emotion=predicted_emotion, 
                                               sad=emotionList[1], delight=emotionList[2], love=emotionList[6], #sad, delight, love 정보만 필요 
@@ -150,13 +133,6 @@ async def predict(input:Request):
         
 model = joblib.load('emotion_classification_model.pkl')
 vectorizer = joblib.load('tfidf_vectorizer.pkl')  
-
-# # 모델 구조 생성
-# eng_model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=7)
-# eng_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-# # 저장된 상태 사전을 모델에 불러오기
-# eng_model_dict = torch.load('emotion_analysis_model_eng.pt')
-# eng_model.load_state_dict(eng_model_dict['model_state_dict'])
 
 @app.post("/soundOfFlower/updateDB")
 async def updateDB(input:Request): 
