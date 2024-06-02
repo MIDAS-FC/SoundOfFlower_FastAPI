@@ -11,7 +11,7 @@ from starlette.middleware.cors import CORSMiddleware
 from torch.utils.data import Dataset, DataLoader
 from torch.nn.functional import softmax
 from kobert_tokenizer import KoBERTTokenizer
-from spotify.spotifyAPI import get_songs
+from spotify.spotifyAPI import get_songs, get_spotify_token
 from musixmatch.musixmatchAPI import get_lyrics
 from pydanticModels import SongItem
 import createSong
@@ -151,10 +151,8 @@ async def predict(input:Request):
                                               maintain=inputMaintain, preEmotion=inputEmotion)
     }
         
-model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=3)
-model.load_state_dict(torch.load('emotion_analysis_model (1).pt'))
-model.eval()  # 모델을 평가 모드로 설정
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model = BertForSequenceClassification.from_pretrained("./eng_emotion_model")
+tokenizer = BertTokenizer.from_pretrained("./eng_emotion_model")
 
 @app.post("/soundOfFlower/updateDB")
 async def updateDB(input:Request): 
@@ -184,11 +182,10 @@ async def updateDB(input:Request):
         for lyric in lyricList:
             print("after lyric for")
             text = lyric
-            processed_text = tokenizer(text, truncation=True, padding=True, max_length=512, return_tensors='pt')
+            processed_text = tokenizer(text, truncation=True, padding=True, max_length=128, return_tensors='pt')
             with torch.no_grad():
                 outputs = model(**processed_text)
-                logits = outputs.logits
-                scores = F.softmax(logits, dim=1).squeeze().tolist()
+                scores = torch.softmax(outputs.logits, dim=1).squeeze().tolist()
             total_emotion += scores
                 
         average_emotion = total_emotion / len(lyricList)
@@ -211,6 +208,13 @@ async def updateDB(input:Request):
             
     return {"validInput": True}
 
+@app.get("/soundOfFlower/getSpotifyToken")
+async def getSpotifyToken():
+    token = get_spotify_token()
+    if token == None:
+        return {"token" : None}
+    else:
+        return {"token" : token}
 
 
     

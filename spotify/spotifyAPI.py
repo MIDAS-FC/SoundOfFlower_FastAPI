@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import os
 from pydantic import BaseModel
 from typing import List
+import base64
+import requests
 
 # .env 파일의 환경 변수를 불러옴.
 load_dotenv()
@@ -38,3 +40,24 @@ def get_songs(playlistID:str) -> List[Song]:
         
     return songs
 
+def get_spotify_token():
+    SPOTIFY_CID = os.getenv('SPOTIFY_CID')
+    SPOTIFY_SECRET = os.getenv('SPOTIFY_SECRET')
+    # 토큰 엔드포인트
+    auth_url = 'https://accounts.spotify.com/api/token'
+    # 기본 인증 헤더 생성
+    auth_header = base64.b64encode(f"{SPOTIFY_CID}:{SPOTIFY_SECRET}".encode()).decode()
+    headers = {
+        'Authorization': f'Basic {auth_header}',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    data = {
+        'grant_type': 'client_credentials'
+    }
+    
+    # 토큰 요청
+    response = requests.post(auth_url, headers=headers, data=data)
+    if response.status_code == 200:
+        return response.json().get('access_token')
+    else:
+        return None

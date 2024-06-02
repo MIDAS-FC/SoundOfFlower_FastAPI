@@ -6,6 +6,7 @@ from spotify.spotifyAPI import Song
 from typing import List
 import nltk
 from nltk.corpus import stopwords
+import re
 
 # .env 파일의 환경 변수를 불러옴.
 load_dotenv()
