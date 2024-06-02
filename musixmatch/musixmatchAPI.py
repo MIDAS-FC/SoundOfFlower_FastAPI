@@ -4,9 +4,14 @@ from dotenv import load_dotenv
 import os
 from spotify.spotifyAPI import Song
 from typing import List
+import nltk
+from nltk.corpus import stopwords
 
 # .env 파일의 환경 변수를 불러옴.
 load_dotenv()
+# Download stopwords
+nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
 
 def get_lyrics(song: Song) -> list:
     
@@ -36,7 +41,18 @@ def get_lyrics(song: Song) -> list:
         data = data['message']['body']
         strs = data['lyrics']['lyrics_body'].split('\n')
 
+        processed_texts = [simple_preprocess(text) for text in strs[:-3]]
+        
         # split 했을 때 마지막 3개 데이터 필요없음.
-        return strs[:-3]
+        return processed_texts
     else:
         return None
+
+def simple_preprocess(text):
+    # Remove special characters and numbers
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    # Convert to lowercase
+    text = text.lower()
+    # Remove stopwords
+    text = ' '.join([word for word in text.split() if word not in stop_words])
+    return text

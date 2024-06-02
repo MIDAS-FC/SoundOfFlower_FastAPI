@@ -10,8 +10,6 @@ positive.pt
 
 negative.pt
 
-tfidf_vectorizer.pkl
-
-emotion_classification_model.pkl
+emotion_analysis_model (1).pt
 
 .env

@@ -15,7 +15,8 @@ from spotify.spotifyAPI import get_songs
 from musixmatch.musixmatchAPI import get_lyrics
 from pydanticModels import SongItem
 import createSong
-import joblib
+import torch.nn.functional as F
+
 
 app = FastAPI()
 
@@ -131,8 +132,10 @@ async def predict(input:Request):
                                               maintain=inputMaintain, preEmotion=inputEmotion)
     }
         
-model = joblib.load('emotion_classification_model.pkl')
-vectorizer = joblib.load('tfidf_vectorizer.pkl')  
+model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=3)
+model.load_state_dict(torch.load('emotion_analysis_model (1).pt'))
+model.eval()  # 모델을 평가 모드로 설정
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 @app.post("/soundOfFlower/updateDB")
 async def updateDB(input:Request): 
@@ -142,8 +145,8 @@ async def updateDB(input:Request):
         return {"validInput": True}
     
     # 감정 레이블 정의
-    emotion_labels = ['sadness', 'happiness', 'love']
-    emotion_type_labels = ['sad', 'delight', 'love']
+    emotion_labels = ['happy', 'love', 'sadness' ]
+    emotion_type_labels = ['delight', 'love', 'sad']
     songs = get_songs(inputPlaylist)
     for song in songs:
         if createSong.alreadyExist(db=session, spotify=song.trackId): #이미 DB에 있으면 continue
@@ -162,8 +165,11 @@ async def updateDB(input:Request):
         for lyric in lyricList:
             print("after lyric for")
             text = lyric
-            text_vec = vectorizer.transform([text])
-            scores = model.predict_proba(text_vec)[0]
+            processed_text = tokenizer(text, truncation=True, padding=True, max_length=512, return_tensors='pt')
+            with torch.no_grad():
+                outputs = model(**processed_text)
+                logits = outputs.logits
+                scores = F.softmax(logits, dim=1).squeeze().tolist()
             total_emotion += scores
                 
         average_emotion = total_emotion / len(lyricList)
@@ -177,7 +183,7 @@ async def updateDB(input:Request):
         if emotion == 'sadness':
             print("emotion : "+emotion)
             createSong.create_sadMusic(session, songItem)
-        elif emotion == 'happiness':
+        elif emotion == 'happy':
             print(emotion)
             createSong.create_delightMusic(session, songItem)
         elif emotion == 'love':
