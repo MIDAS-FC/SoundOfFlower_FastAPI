@@ -14,7 +14,7 @@ load_dotenv()
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
-def get_lyrics(song: Song) -> list:
+def get_lyrics(song: Song) -> str:
     
     api_key = "&apikey=" + os.getenv('MUSIXMATCH_API_KEY')
 
@@ -41,11 +41,16 @@ def get_lyrics(song: Song) -> list:
     if status_code == 200:
         data = data['message']['body']
         strs = data['lyrics']['lyrics_body'].split('\n')
-
-        processed_texts = [simple_preprocess(text) for text in strs[:-3]]
+        totalStr = ""
+        for str in strs:
+            simple_preprocess(str)
+            totalStr = totalStr+str+". " 
+        
+        #processed_texts = simple_preprocess(strs)
+        
         
         # split 했을 때 마지막 3개 데이터 필요없음.
-        return processed_texts
+        return totalStr
     else:
         return None
 

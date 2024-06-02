@@ -82,13 +82,8 @@ async def predict(input:Request):
     inputEmotion = input['emotion']
     inputMaintain = input['maintain']
     
-    #주어진 문장과 더미 레이블을 포함하는 데이터를 준비
-    data = [inputStr, '0']  # '0'은 더미 레이블
-    dataset_another = [data]
-    #주어진 데이터로 BERTDataset 초기화
-    another_test = BERTDataset(dataset_another, 0, 1, kr_tokenizer, 64, True, False)
-    #DataLoader를 생성하여 데이터셋을 배치로 나누고 모델에 제공
-    test_dataloader = DataLoader(another_test, batch_size=1, num_workers=0)
+    #주어진 문장을 줄 단위로 나누기
+    strList = inputStr.split('\n')
     
     #emotion이 뭔지? -> 각 이모션에 맞는 모델로 감정 분석, 
     if inputEmotion == 'positive':
@@ -96,43 +91,68 @@ async def predict(input:Request):
         positive_emotions = ["기쁨", "사랑"]
         positive_model.eval()
         
-            #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
-        for batch_data in test_dataloader:
-            #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
-            token_ids = batch_data['input_ids'].to(device) 
-            attention_mask = batch_data['attention_mask'].to(device)
+        for strElement in strList:
+            #주어진 문장과 더미 레이블을 포함하는 데이터를 준비
+            data = [strElement, '0']  # '0'은 더미 레이블
+            dataset_another = [data]
+            #주어진 데이터로 BERTDataset 초기화
+            another_test = BERTDataset(dataset_another, 0, 1, kr_tokenizer, 64, True, False)
+            #DataLoader를 생성하여 데이터셋을 배치로 나누고 모델에 제공
+            test_dataloader = DataLoader(another_test, batch_size=1, num_workers=0)
+            
+                #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
+            for batch_data in test_dataloader:
+                #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
+                token_ids = batch_data['input_ids'].to(device) 
+                attention_mask = batch_data['attention_mask'].to(device)
 
-            #모델을 통해 문장을 전달해 예측 수행
-            out = positive_model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
-            # Softmax를 적용하여 모델의 출력을 확률로 변환.
-            logits = out.detach().cpu().numpy()
-            #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
-            probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
-            positive_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
-            predicted_emotion = positive_emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
-            emotionList = [0, 0, positive_emotion_counts[0], 0, 0, 0, positive_emotion_counts[1]]
-            # angry0, sad1, delight2, calm3, embarrased4(불안), anxiety5(우울), love6
+                #모델을 통해 문장을 전달해 예측 수행
+                with torch.no_grad():
+                    out = positive_model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
+                    # Softmax를 적용하여 모델의 출력을 확률로 변환.
+                    logits = out.detach().cpu().numpy()
+                    #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
+                    probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
+                positive_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
+            
+            average_emotion = positive_emotion_counts/len(strList)
+            predicted_emotion = positive_emotions[np.argmax(average_emotion)] #가장 높은 확률을 가진 감정을 츄출
+            emotionList = [0, 0, average_emotion[0], 0, 0, 0, average_emotion[1]]
+                # angry0, sad1, delight2, calm3, embarrased4(불안), anxiety5(우울), love6
+                
     elif inputEmotion == 'negative':
         negative_emotion_counts = np.zeros(4)
         negative_emotions = ["분노", "우울", "불안", "슬픔"]
         negative_model.eval()
         
-            #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
-        for batch_data in test_dataloader:
-            #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
-            token_ids = batch_data['input_ids'].to(device) 
-            attention_mask = batch_data['attention_mask'].to(device)
+        for strElement in strList:
+            #주어진 문장과 더미 레이블을 포함하는 데이터를 준비
+            data = [strElement, '0']  # '0'은 더미 레이블
+            dataset_another = [data]
+            #주어진 데이터로 BERTDataset 초기화
+            another_test = BERTDataset(dataset_another, 0, 1, kr_tokenizer, 64, True, False)
+            #DataLoader를 생성하여 데이터셋을 배치로 나누고 모델에 제공
+            test_dataloader = DataLoader(another_test, batch_size=1, num_workers=0)
+            
+                #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
+            for batch_data in test_dataloader:
+                #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
+                token_ids = batch_data['input_ids'].to(device) 
+                attention_mask = batch_data['attention_mask'].to(device)
 
-            #모델을 통해 문장을 전달해 예측 수행
-            out = negative_model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
-            # Softmax를 적용하여 모델의 출력을 확률로 변환.
-            logits = out.detach().cpu().numpy()
-            #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
-            probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
-            negative_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
-            predicted_emotion = negative_emotions[np.argmax(probabilities)] #가장 높은 확률을 가진 감정을 츄출
-            emotionList = [negative_emotion_counts[0], negative_emotion_counts[3], 0, 0, negative_emotion_counts[2], negative_emotion_counts[1], 0]
-            #[2]가 원래 당황, [1]이 불안
+                with torch.no_grad():
+                    #모델을 통해 문장을 전달해 예측 수행
+                    out = negative_model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
+                    # Softmax를 적용하여 모델의 출력을 확률로 변환.
+                    logits = out.detach().cpu().numpy()
+                    #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
+                    probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
+                negative_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
+                
+            average_emotion = negative_emotion_counts/len(strList)
+            predicted_emotion = negative_emotions[np.argmax(average_emotion)] #가장 높은 확률을 가진 감정을 츄출
+            emotionList = [average_emotion[0], average_emotion[3], 0, 0, average_emotion[2], average_emotion[1], 0]
+                #[2]가 원래 당황, [1]이 불안
     else: #neutrality. 감정 분석 안함. 바로 중립 노래 추천    
         predicted_emotion = '중립'
         emotionList = [0, 0, 0, 1, 0, 0, 0]
@@ -170,30 +190,26 @@ async def updateDB(input:Request):
             print("continue!")
             continue
         
-        lyricList = get_lyrics(song)
+        lyrics = get_lyrics(song)
         print("a")
-        print(type(lyricList))
-        if lyricList == None:
+        print(type(lyrics))
+        if lyrics == None:
             continue
         
-        total_emotion = np.zeros(len(emotion_labels))
-        
-        print("before lyric for")
-        for lyric in lyricList:
-            print("after lyric for")
-            text = lyric
-            processed_text = tokenizer(text, truncation=True, padding=True, max_length=128, return_tensors='pt')
-            with torch.no_grad():
-                outputs = model(**processed_text)
-                scores = torch.softmax(outputs.logits, dim=1).squeeze().tolist()
-            total_emotion += scores
+        print("before lyric for") 
+
+        processed_lyrics = tokenizer(lyrics, truncation=True, padding=True, max_length=128, return_tensors='pt')
+        with torch.no_grad():
+            outputs = model(**processed_lyrics)
+            scores = torch.softmax(outputs.logits, dim=1).squeeze().tolist()
+        #total_emotion += scores
                 
-        average_emotion = total_emotion / len(lyricList)
-        max_index = np.argmax(average_emotion)
+        #average_emotion = total_emotion / len(lyrics)
+        max_index = np.argmax(scores)
         print("max_index : "+str(max_index))
         emotion = emotion_labels[max_index]
         
-        songItem = SongItem(title=song.trackName, spotify=song.trackId, emotion=emotion, emotionList=average_emotion.tolist())
+        songItem = SongItem(title=song.trackName, spotify=song.trackId, emotion=emotion, emotionList=scores)
         print("emotion : "+emotion)
         createSong.create_Music(session, songItem, emotion_type_labels[max_index])
         if emotion == 'sadness':
@@ -215,6 +231,8 @@ async def getSpotifyToken():
         return {"token" : None}
     else:
         return {"token" : token}
-
+    
+        
+    
 
     
