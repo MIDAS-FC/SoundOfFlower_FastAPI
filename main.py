@@ -27,6 +27,25 @@ if torch.cuda.is_available():
 else:
     device = torch.device("cpu")
     print('No GPU available, using the CPU instead.')
+    
+# device = torch.device("cpu")
+# print(f"Using device: {device}")
+
+# # 모델 로드
+# positive_model_dict = torch.load('positive.pt', map_location=device)
+# negative_model_dict = torch.load('negative.pt', map_location=device)
+
+# # 긍정/부정에 공통적으로 쓰이는 BERT 모델과 토크나이저 설정
+# bertmodel = BertModel.from_pretrained('skt/kobert-base-v1', return_dict=False)
+# kr_tokenizer = KoBERTTokenizer.from_pretrained('skt/kobert-base-v1')
+
+# # 긍정 모델 초기화 및 로드
+# positive_model = PositiveBERTClassifier(bertmodel, dr_rate=0.5).to(device)
+# positive_model.load_state_dict(positive_model_dict)
+
+# # 부정 모델 초기화 및 로드
+# negative_model = NegativeBERTClassifier(bertmodel, dr_rate=0.5).to(device)
+# negative_model.load_state_dict(negative_model_dict)
 
 #긍정/부정에 공통적으로 쓰이는
 bertmodel = BertModel.from_pretrained('skt/kobert-base-v1', return_dict=False)
