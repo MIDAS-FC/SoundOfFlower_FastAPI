@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import emotionFunc
 from DB.database import engineconn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from transformers import BertModel, BertForSequenceClassification, BertTokenizer
 from kr.positive_bert import PositiveBERTClassifier
 from kr.negative_bert import NegativeBERTClassifier
@@ -16,7 +16,8 @@ from musixmatch.musixmatchAPI import get_lyrics
 from pydanticModels import SongItem
 import createSong
 import torch.nn.functional as F
-
+import pprint
+import requests
 
 app = FastAPI()
 
@@ -82,43 +83,33 @@ async def predict(input:Request):
     inputEmotion = input['emotion']
     inputMaintain = input['maintain']
     
-    #주어진 문장을 줄 단위로 나누기
+    #주어진 텍스트를 문장별로 끊기
     strList = inputStr.split('\n')
     
-    #emotion이 뭔지? -> 각 이모션에 맞는 모델로 감정 분석, 
     if inputEmotion == 'positive':
         positive_emotion_counts = np.zeros(2)
         positive_emotions = ["기쁨", "사랑"]
         positive_model.eval()
         
         for strElement in strList:
-            #주어진 문장과 더미 레이블을 포함하는 데이터를 준비
-            data = [strElement, '0']  # '0'은 더미 레이블
+            data = [strElement, '0'] 
             dataset_another = [data]
-            #주어진 데이터로 BERTDataset 초기화
             another_test = BERTDataset(dataset_another, 0, 1, kr_tokenizer, 64, True, False)
-            #DataLoader를 생성하여 데이터셋을 배치로 나누고 모델에 제공
             test_dataloader = DataLoader(another_test, batch_size=1, num_workers=0)
             
-                #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
             for batch_data in test_dataloader:
-                #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
                 token_ids = batch_data['input_ids'].to(device) 
                 attention_mask = batch_data['attention_mask'].to(device)
 
-                #모델을 통해 문장을 전달해 예측 수행
                 with torch.no_grad():
                     out = positive_model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
-                    # Softmax를 적용하여 모델의 출력을 확률로 변환.
                     logits = out.detach().cpu().numpy()
-                    #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
                     probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
-                positive_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
+                positive_emotion_counts += probabilities[0]
             
             average_emotion = positive_emotion_counts/len(strList)
-            predicted_emotion = positive_emotions[np.argmax(average_emotion)] #가장 높은 확률을 가진 감정을 츄출
+            predicted_emotion = positive_emotions[np.argmax(average_emotion)] 
             emotionList = [0, 0, average_emotion[0], 0, 0, 0, average_emotion[1]]
-                # angry0, sad1, delight2, calm3, embarrased4(불안), anxiety5(우울), love6
                 
     elif inputEmotion == 'negative':
         negative_emotion_counts = np.zeros(4)
@@ -126,33 +117,26 @@ async def predict(input:Request):
         negative_model.eval()
         
         for strElement in strList:
-            #주어진 문장과 더미 레이블을 포함하는 데이터를 준비
-            data = [strElement, '0']  # '0'은 더미 레이블
+            data = [strElement, '0']  
             dataset_another = [data]
-            #주어진 데이터로 BERTDataset 초기화
             another_test = BERTDataset(dataset_another, 0, 1, kr_tokenizer, 64, True, False)
-            #DataLoader를 생성하여 데이터셋을 배치로 나누고 모델에 제공
             test_dataloader = DataLoader(another_test, batch_size=1, num_workers=0)
             
-                #배치 데이터를 반복. 각 배치에는 한 문장이 포함됨.
             for batch_data in test_dataloader:
-                #배치 데이터로부터 토큰 ID와 어텐션 마스크 추출. 이것들은 모델에 입력됨.
                 token_ids = batch_data['input_ids'].to(device) 
                 attention_mask = batch_data['attention_mask'].to(device)
 
                 with torch.no_grad():
-                    #모델을 통해 문장을 전달해 예측 수행
                     out = negative_model(token_ids=token_ids, valid_length=torch.sum(token_ids != 0, dim=1))
-                    # Softmax를 적용하여 모델의 출력을 확률로 변환.
                     logits = out.detach().cpu().numpy()
-                    #probabilities는 한 문장에 대해 각각의 감정 카테고리에 대한 확률을 포함하고 있음
+                
                     probabilities = softmax(torch.tensor(logits), dim=1).numpy() 
-                negative_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 더한다.
+                negative_emotion_counts += probabilities[0]  # 각각의 감정에 대한 확률 값을 감정 카테고리별 카운트에 누적.
                 
             average_emotion = negative_emotion_counts/len(strList)
-            predicted_emotion = negative_emotions[np.argmax(average_emotion)] #가장 높은 확률을 가진 감정을 츄출
+            predicted_emotion = negative_emotions[np.argmax(average_emotion)]
             emotionList = [average_emotion[0], average_emotion[3], 0, 0, average_emotion[2], average_emotion[1], 0]
-                #[2]가 원래 당황, [1]이 불안
+            
     else: #neutrality. 감정 분석 안함. 바로 중립 노래 추천    
         predicted_emotion = '중립'
         emotionList = [0, 0, 0, 1, 0, 0, 0]
@@ -178,10 +162,9 @@ tokenizer = BertTokenizer.from_pretrained("./eng_emotion_model")
 async def updateDB(input:Request): 
     input = await input.json()
     inputPlaylist = input['playlist']
-    if not inputPlaylist.strip():  # playlist가 없거나 공백으로 이루어져있으면
+    if not inputPlaylist.strip(): 
         return {"validInput": True}
     
-    # 감정 레이블 정의
     emotion_labels = ['happy', 'love', 'sadness' ]
     emotion_type_labels = ['delight', 'love', 'sad']
     songs = get_songs(inputPlaylist)
@@ -201,10 +184,8 @@ async def updateDB(input:Request):
         processed_lyrics = tokenizer(lyrics, truncation=True, padding=True, max_length=128, return_tensors='pt')
         with torch.no_grad():
             outputs = model(**processed_lyrics)
-            scores = torch.softmax(outputs.logits, dim=1).squeeze().tolist()
-        #total_emotion += scores
-                
-        #average_emotion = total_emotion / len(lyrics)
+            scores = torch.softmax(outputs.logits, dim=1).squeeze().tolist()        
+     
         max_index = np.argmax(scores)
         print("max_index : "+str(max_index))
         emotion = emotion_labels[max_index]
@@ -232,7 +213,27 @@ async def getSpotifyToken():
     else:
         return {"token" : token}
     
-        
+@app.get("/spotify/track/{track_id}")
+async def get_spotify_track_info(track_id: str):
+    token = get_spotify_token()
+    
+    if token is None:
+        raise HTTPException(status_code=500, detail="Unable to retrieve Spotify token")
+    
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    response = requests.get(f"https://api.spotify.com/v1/tracks/{track_id}", headers=headers)
+    
+    track_info = response.json()
+    is_playable = track_info.get("is_playable")
+    
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=response.json())
+    else:
+        return response.json()
+
+
     
 
     

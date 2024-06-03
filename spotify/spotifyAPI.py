@@ -8,7 +8,6 @@ from typing import List
 import base64
 import requests
 
-# .env 파일의 환경 변수를 불러옴.
 load_dotenv()
 
 class Song(BaseModel):
@@ -19,7 +18,6 @@ class Song(BaseModel):
 def get_songs(playlistID:str) -> List[Song]:
     cid = os.getenv('SPOTIFY_CID')
     secret = os.getenv('SPOTIFY_SECRET')
-    # 기존에는 37i9dQZF1DXcBWIGoYBM5M
     playlist_id = playlistID
     songs = []
     
@@ -29,6 +27,16 @@ def get_songs(playlistID:str) -> List[Song]:
 
     for item in results['items']:
         track = item['track']
+        is_playble = track['is_playable']
+        explicit = track['explicit']
+        print("is playble? "+str(is_playble))
+        print("explicit? "+str(explicit))
+        if is_playble == False:
+            continue
+        if explicit == True:
+            continue
+        
+        print("after if")
         artist_names = [artist['name'] for artist in track['artists']]
         data = {
             "trackId": str(track['id']),
@@ -43,9 +51,9 @@ def get_songs(playlistID:str) -> List[Song]:
 def get_spotify_token():
     SPOTIFY_CID = os.getenv('SPOTIFY_CID')
     SPOTIFY_SECRET = os.getenv('SPOTIFY_SECRET')
-    # 토큰 엔드포인트
+
     auth_url = 'https://accounts.spotify.com/api/token'
-    # 기본 인증 헤더 생성
+
     auth_header = base64.b64encode(f"{SPOTIFY_CID}:{SPOTIFY_SECRET}".encode()).decode()
     headers = {
         'Authorization': f'Basic {auth_header}',
@@ -55,7 +63,6 @@ def get_spotify_token():
         'grant_type': 'client_credentials'
     }
     
-    # 토큰 요청
     response = requests.post(auth_url, headers=headers, data=data)
     if response.status_code == 200:
         return response.json().get('access_token')

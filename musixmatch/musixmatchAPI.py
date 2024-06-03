@@ -8,9 +8,7 @@ import nltk
 from nltk.corpus import stopwords
 import re
 
-# .env 파일의 환경 변수를 불러옴.
 load_dotenv()
-# Download stopwords
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
@@ -33,7 +31,6 @@ def get_lyrics(song: Song) -> str:
     api_call = (base_url + lyrics_matcher + format_url + artist_search_parameter + artist_name
                 + track_search_parameter + track_name + api_key)
 
-    # call the api
     request = requests.get(api_call)
     data = request.json()
     status_code = data['message']['header']['status_code']
@@ -45,20 +42,12 @@ def get_lyrics(song: Song) -> str:
         for str in strs:
             simple_preprocess(str)
             totalStr = totalStr+str+". " 
-        
-        #processed_texts = simple_preprocess(strs)
-        
-        
-        # split 했을 때 마지막 3개 데이터 필요없음.
         return totalStr
     else:
         return None
 
 def simple_preprocess(text):
-    # Remove special characters and numbers
-    text = re.sub(r'[^a-zA-Z\s]', '', text)
-    # Convert to lowercase
-    text = text.lower()
-    # Remove stopwords
-    text = ' '.join([word for word in text.split() if word not in stop_words])
+    text = re.sub(r'[^a-zA-Z\s]', '', text) #특수문자 및 숫자 제거
+    text = text.lower() #소문자로 변환
+    text = ' '.join([word for word in text.split() if word not in stop_words]) #stopwords 제거
     return text
