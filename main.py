@@ -233,7 +233,9 @@ async def get_spotify_track_info(track_id: str):
     if response.status_code != 200:
         return {"status_code": 503, "error": "spotify API response is not available"}
     else:
-        return response_json
+        return {"status_code": 200, "response" : response_json}
+    
+@app.get("/")
 
 
     
