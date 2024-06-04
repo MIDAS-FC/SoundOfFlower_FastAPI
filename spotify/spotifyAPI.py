@@ -35,6 +35,9 @@ def get_songs(playlistID:str) -> List[Song]:
             continue
         if explicit == True:
             continue
+        if track['preview_url'] is None:
+            print("preview url이 없어용")
+            continue
         
         print("after if")
         artist_names = [artist['name'] for artist in track['artists']]

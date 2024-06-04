@@ -3,15 +3,19 @@ from DB.models import SadMusic, DelightMusic, LoveMusic, Music
 from pydanticModels import SongItem
 
 def alreadyExist(db: Session, spotify:str):
-    song = db.query(SadMusic).filter(SadMusic.spotify == spotify).first()
+    song = db.query(Music).filter(Music.spotify == spotify).first()
     if song:
         return True
-    song = db.query(DelightMusic).filter(DelightMusic.spotify == spotify).first()
-    if song:
-        return True
-    song = db.query(LoveMusic).filter(LoveMusic.spotify == spotify).first()
-    if song:
-        return True
+    
+    # song = db.query(SadMusic).filter(SadMusic.spotify == spotify).first()
+    # if song:
+    #     return True
+    # song = db.query(DelightMusic).filter(DelightMusic.spotify == spotify).first()
+    # if song:
+    #     return True
+    # song = db.query(LoveMusic).filter(LoveMusic.spotify == spotify).first()
+    # if song:
+    #     return True
     
     return False
 

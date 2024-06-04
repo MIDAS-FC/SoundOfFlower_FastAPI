@@ -141,6 +141,8 @@ async def predict(input:Request):
         predicted_emotion = '중립'
         emotionList = [0, 0, 0, 1, 0, 0, 0]
     
+    print("추천 노래 : " + str(spotify))
+    
     return {
         'flower' : emotionFunc.flower(predicted_emotion),
         'angry' : emotionList[0],
@@ -230,14 +232,10 @@ async def get_spotify_track_info(track_id: str):
     except:
         return {"status_code": 404, "error": "no track content"}
     
+    pprint.pprint(response_json)
+    
     if response.status_code != 200:
         return {"status_code": 503, "error": "spotify API response is not available"}
     else:
         return {"status_code": 200, "response" : response_json}
-    
-@app.get("/")
-
-
-    
-
     
