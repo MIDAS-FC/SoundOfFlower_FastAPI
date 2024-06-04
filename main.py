@@ -218,18 +218,20 @@ async def get_spotify_track_info(track_id: str):
     token = get_spotify_token()
     
     if token is None:
-        raise HTTPException(status_code=500, detail="Unable to retrieve Spotify token")
+        return {"status_code": 204, "error": "Unable to retrieve Spotify token"}
     
     headers = {
         "Authorization": f"Bearer {token}"
     }
     response = requests.get(f"https://api.spotify.com/v1/tracks/{track_id}", headers=headers)
     
+    if not response.content:
+        return {"status_code": 404, "error": "no track content"}
+    
     track_info = response.json()
-    is_playable = track_info.get("is_playable")
     
     if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail=response.json())
+        return {"status_code": 503, "error": response.json()}
     else:
         return response.json()
 
