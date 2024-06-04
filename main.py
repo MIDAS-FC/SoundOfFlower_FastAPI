@@ -225,15 +225,15 @@ async def get_spotify_track_info(track_id: str):
     }
     response = requests.get(f"https://api.spotify.com/v1/tracks/{track_id}", headers=headers)
     
-    if not response.content:
+    try:
+        response_json = response.json()
+    except:
         return {"status_code": 404, "error": "no track content"}
     
-    track_info = response.json()
-    
     if response.status_code != 200:
-        return {"status_code": 503, "error": response.json()}
+        return {"status_code": 503, "error": "spotify API response is not available"}
     else:
-        return response.json()
+        return response_json
 
 
     
