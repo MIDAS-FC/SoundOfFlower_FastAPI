@@ -6,7 +6,8 @@ def alreadyExist(db: Session, spotify:str):
     song = db.query(Music).filter(Music.spotify == spotify).first()
     if song:
         return True
-    
+    else:
+        return False
     # song = db.query(SadMusic).filter(SadMusic.spotify == spotify).first()
     # if song:
     #     return True
@@ -17,7 +18,6 @@ def alreadyExist(db: Session, spotify:str):
     # if song:
     #     return True
     
-    return False
 
 def create_Music(db: Session, songItem:SongItem, emotionType:str):
     music = Music(spotify=songItem.spotify,
